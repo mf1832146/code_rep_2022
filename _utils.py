@@ -4,7 +4,7 @@ import numpy as np
 from pymongo import MongoClient
 
 
-def build_relative_position(query_size=256, key_size=256, max_relative_positions=64):
+def build_relative_position(query_size=600, key_size=600, max_relative_positions=64):
     max_relative_positions = int(max_relative_positions / 2)
     q_ids = torch.arange(query_size, dtype=torch.long, device='cpu')
     k_ids = torch.arange(key_size, dtype=torch.long, device='cpu')
