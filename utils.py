@@ -137,18 +137,27 @@ def get_func_naming_feature(result, tokenizer, args):
 
     if args.use_dfg:
         source_len = len(source_ids)
+        dfg_to_dfg = dfg_to_dfg[:args.max_dfg_len]
+        dfg_to_code = dfg_to_code[:args.max_dfg_len]
         source_ids += [tokenizer.unk_token_id] * len(dfg_to_dfg)
         length = len([tokenizer.cls_token]) + len(non_leaf_tokens) if args.use_ast else len([tokenizer.cls_token])
 
+        leaf_len = len(leaf_tokens)
+
         # dfg_to_code
         for i, (a, b) in enumerate(dfg_to_code):
+            if a >= leaf_len:
+                continue
+            if b >= leaf_len:
+                b = leaf_len
             rel_pos[i+source_len, a+length:b+length] = 1  # 1 means self
             rel_pos[a+length:b+length, i+source_len] = 1
 
         # dfg to dfg
         for i, item in enumerate(dfg_to_dfg):
             for j in item:
-                rel_pos[(i + source_len, j + source_len)] = 1
+                if i < args.max_dfg_len and j < args.max_dfg_len:
+                    rel_pos[(i + source_len, j + source_len)] = 1
 
     # special tokens attend to all tokens
     end_s_pos = len([tokenizer.cls_token]) + len(leaf_tokens)
