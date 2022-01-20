@@ -26,7 +26,7 @@ def get_args_by_task_model(task):
         epoch = 200
         patience = 5
 
-        bs = 32
+        bs = 32 * 8
     lr = 5
     return bs, lr, max_ast_len, max_code_len, max_dfg_len, max_rel_pos, trg_len, patience, epoch
 
