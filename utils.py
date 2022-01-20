@@ -12,7 +12,7 @@ from _utils import build_relative_position, connect_db
 
 logger = logging.getLogger(__name__)
 
-seq_rel_pos = build_relative_position().squeeze(0)
+seq_rel_pos = build_relative_position()[0]
 
 
 def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
