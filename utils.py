@@ -25,7 +25,9 @@ def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
     else:
         logger.info("Create cache data into %s", cache_fn)
 
-        return_items = {'_id': 1}
+        return_items = {'code_index': 1, 'non_leaf_tokens': 1, 'masked_leaf_tokens': 1,
+                        'split_ud_pos': 1, 'dfg_to_dfg': 1, 'dfg_to_code': 1,
+                        'func_name': 1}
         conditions = {'partition': split_tag, 'lang': args.sub_task, 'is_ok': 1}
 
         results = connect_db().codes.find(conditions, return_items)
@@ -68,12 +70,7 @@ class FuncNamingFeature(object):
         self.target_mask = target_mask
 
 
-def get_func_naming_feature(result, tokenizer, args):
-    return_items = {'code_index': 1, 'non_leaf_tokens': 1, 'masked_leaf_tokens': 1,
-                    'split_ud_pos': 1, 'dfg_to_dfg': 1, 'dfg_to_code': 1,
-                    'func_name': 1}
-    item = connect_db().codes.find({'_id': result['_id']}, return_items)[0]
-
+def get_func_naming_feature(item, tokenizer, args):
     example_id = item['code_index']
     non_leaf_tokens = item['non_leaf_tokens']
     leaf_tokens = item['masked_leaf_tokens']
