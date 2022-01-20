@@ -28,7 +28,7 @@ def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
         return_items = {'_id': 1}
         conditions = {'partition': split_tag, 'lang': args.sub_task, 'is_ok': 1}
 
-        results = connect_db().codes.find(conditions, return_items)[:100]
+        results = connect_db().codes.find(conditions, return_items)
         examples = pool.map(partial(get_func_naming_feature, tokenizer=tokenizer, args=args),
                             tqdm(list(results), total=results.count()))
         data = FuncNamingDataset(examples)
@@ -133,6 +133,10 @@ def get_func_naming_feature(result, tokenizer, args):
         if args.use_ast:
             rel_leaf_pos += args.max_rel_pos  # 偏移
         length = len([tokenizer.cls_token]) + len(non_leaf_tokens)
+        print(leaf_token_len)
+        print(rel_leaf_pos.size())
+        print(rel_pos.size())
+        print(rel_pos[length:length+leaf_token_len, length:length+leaf_token_len].size())
         rel_pos[length:length+leaf_token_len, length:length+leaf_token_len] = rel_leaf_pos
 
     if args.use_dfg:
