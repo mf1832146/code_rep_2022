@@ -10,8 +10,6 @@ import pickle
 from tokenizers import Tokenizer
 from tqdm import tqdm
 from transformers import PreTrainedTokenizerFast
-from pymongo.errors import AutoReconnect
-from retrying import retry
 from _utils import ast2seq, connect_db, get_ud2pos
 
 
