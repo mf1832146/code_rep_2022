@@ -110,11 +110,11 @@ def deal_with_ast(item):
     try:
         db.update_one({'_id': _id}, {'$set': add_values})
     except:
-        db.update_one({'_id': _id}, {'$set':{'is_ok': 0}})
+        db.update_one({'_id': _id}, {'$set': {'is_ok': 0}})
 
 
 if __name__ == '__main__':
-    pool = multiprocessing.Pool(10)
+    pool = multiprocessing.Pool(multiprocessing.cpu_count())
     conditions = {'lang': 'javascript', 'build_ast': 1}
     return_items = {'code_index': 1, 'ast': 1, 'func_name': 1, 'dfg': 1, 'index_to_code': 1}
     results = connect_db().codes.find(conditions, return_items)
