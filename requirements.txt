@@ -1,0 +1,6 @@
+pymongo==3.5.1
+transformers~=4.13.0
+tokenizers~=0.10.3
+torch~=1.8.0
+numpy~=1.21.2
+tqdm~=4.62.3

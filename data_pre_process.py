@@ -35,6 +35,10 @@ def deal_with_ast(item):
     func_name = item['func_name']
     if func_name == '':
         return
+
+    if '.' in func_name:
+        func_name = func_name.split('.')[-1]
+
     _id = item['_id']
 
     non_leaf_tokens, leaf_tokens, ud_pos = ast2seq(ast, index2code, ud2pos)
