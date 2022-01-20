@@ -29,7 +29,7 @@ def build_config(args, tokenizer):
         max_rel_pos = int(args.max_rel_pos / 2) + 1
     deberta_config = DebertaConfig(vocab_size=tokenizer.vocab_size,
                                    hidden_size=512,
-                                   num_hidden_layers=6,
+                                   num_hidden_layers=2,
                                    num_attention_heads=8,
                                    intermediate_size=2048,
                                    relative_attention=True,

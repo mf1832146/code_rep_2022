@@ -123,7 +123,7 @@ if __name__ == '__main__':
     parser.add_argument('--lang', type=str)
     args = parser.parse_args()
     print('generate rel pos for lang : ', args.lang)
-    pool = multiprocessing.Pool(multiprocessing.cpu_count())
+    pool = multiprocessing.Pool(5)
     conditions = {'lang': args.lang, 'build_ast': 1}
     return_items = {'code_index': 1, 'ast': 1, 'func_name': 1, 'dfg': 1, 'index_to_code': 1}
     results = connect_db().codes.find(conditions, return_items)

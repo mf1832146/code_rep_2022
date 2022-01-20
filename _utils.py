@@ -1,7 +1,19 @@
 import math
-
+import torch
 import numpy as np
 from pymongo import MongoClient
+
+
+def build_relative_position(query_size=256, key_size=256, max_relative_positions=64):
+    max_relative_positions = int(max_relative_positions / 2)
+    q_ids = torch.arange(query_size, dtype=torch.long, device='cpu')
+    k_ids = torch.arange(key_size, dtype=torch.long, device='cpu')
+    rel_pos_ids = q_ids[:, None] - k_ids.view(1, -1).repeat(query_size, 1)
+    rel_pos_ids = rel_pos_ids[:query_size, :]
+    rel_pos_ids = rel_pos_ids.unsqueeze(0)
+    rel_pos_ids += max_relative_positions + 1
+    rel_pos_ids = torch.clamp(rel_pos_ids, 1, 2 * max_relative_positions + 1)
+    return rel_pos_ids.numpy()
 
 
 def ast2seq(root_node, index2code, ud2pos):
@@ -142,6 +154,6 @@ def get_ud_masks(dp, id2pos, max_len):
 
 
 def connect_db():
-    # 172.29.7.221
-    client = MongoClient('127.0.0.1', 27017, username='admin', password='123456')
+    # 172.29.7.221  127.0.0.1
+    client = MongoClient('172.29.7.221', 27017, username='admin', password='123456')
     return client.code_search_net
