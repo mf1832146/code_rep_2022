@@ -13,7 +13,7 @@ def build_relative_position(query_size=256, key_size=256, max_relative_positions
     rel_pos_ids = rel_pos_ids.unsqueeze(0)
     rel_pos_ids += max_relative_positions + 1
     rel_pos_ids = torch.clamp(rel_pos_ids, 1, 2 * max_relative_positions + 1)
-    return rel_pos_ids.numpy()
+    return rel_pos_ids
 
 
 def ast2seq(root_node, index2code, ud2pos):

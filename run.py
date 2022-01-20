@@ -97,7 +97,7 @@ def main():
     if args.n_gpu > 1:
         # for DataParallel
         model = torch.nn.DataParallel(model)
-    pool = multiprocessing.Pool(1)
+    pool = multiprocessing.Pool(args.cpu_cont)
     fa = open(os.path.join(args.output_dir, 'summary.log'), 'a+')
     if args.do_train:
         if args.local_rank in [-1, 0] and args.data_num == -1:

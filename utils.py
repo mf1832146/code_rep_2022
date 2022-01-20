@@ -12,7 +12,7 @@ from _utils import build_relative_position, connect_db
 
 logger = logging.getLogger(__name__)
 
-seq_rel_pos = build_relative_position()
+seq_rel_pos = build_relative_position().squeeze(0)
 
 
 def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
@@ -133,10 +133,6 @@ def get_func_naming_feature(result, tokenizer, args):
         if args.use_ast:
             rel_leaf_pos += args.max_rel_pos  # 偏移
         length = len([tokenizer.cls_token]) + len(non_leaf_tokens)
-        print(leaf_token_len)
-        print(rel_leaf_pos.size())
-        print(rel_pos.size())
-        print(rel_pos[length:length+leaf_token_len, length:length+leaf_token_len].size())
         rel_pos[length:length+leaf_token_len, length:length+leaf_token_len] = rel_leaf_pos
 
     if args.use_dfg:
