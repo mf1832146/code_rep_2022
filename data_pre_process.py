@@ -10,7 +10,8 @@ import pickle
 from tokenizers import Tokenizer
 from tqdm import tqdm
 from transformers import PreTrainedTokenizerFast
-
+from pymongo.errors import AutoReconnect
+from retrying import retry
 from _utils import ast2seq, connect_db, get_ud2pos
 
 
@@ -26,6 +27,7 @@ tokenizer = PreTrainedTokenizerFast(tokenizer_object=tokenizer,
                                     sep_token='</s>',
                                     pad_token='<pad>',
                                     mask_token='<mask>')
+db = connect_db().codes
 
 
 def deal_with_ast(item):
@@ -102,7 +104,6 @@ def deal_with_ast(item):
     dfg_to_code = [ori2cur_pos[x[1]] for x in dfg]
 
     # 写入数据库
-    db = connect_db().codes
     add_values = {
         'non_leaf_tokens': non_leaf_tokens,
         'leaf_tokens': split_leaf_tokens,
@@ -127,6 +128,9 @@ if __name__ == '__main__':
     conditions = {'lang': args.lang, 'build_ast': 1}
     return_items = {'code_index': 1, 'ast': 1, 'func_name': 1, 'dfg': 1, 'index_to_code': 1}
     results = connect_db().codes.find(conditions, return_items)
+
+    for result in tqdm(results, total=results.count(), desc= 'generate rel pos'):
+        deal_with_ast(result)
 
     pool.map(deal_with_ast, tqdm(list(results), 'generate rel pos'))
 
