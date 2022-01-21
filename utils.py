@@ -202,10 +202,10 @@ def get_func_naming_feature(item, tokenizer, args):
     padding_length = 7 - len(target_ids)
     target_ids += [tokenizer.pad_token_id] * padding_length
     target_mask += [0] * padding_length
-
-    assert (len(source_ids) == 512+64)
-    assert (len(position_idx) == 512 + 64)
-    assert (len(source_mask) == 512 + 64)
+    if len(source_ids) != (512+64):
+        logger.info('ast len ' + str(len(source_tokens)))
+        logger.info('dfg len ' + str(len(dfg_to_dfg)))
+        logger.info('fina source id ' + str(len(source_ids)))
 
     feature = FuncNamingFeature(example_id,
                                 source_ids,
