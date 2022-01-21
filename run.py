@@ -35,7 +35,7 @@ def eval_ppl_epoch(args, eval_dataloader, model):
     eval_loss, batch_num = 0, 0
     for batch in tqdm(eval_dataloader, total=len(eval_dataloader), desc="Eval ppl"):
         batch = tuple(t.to(args.device) for t in batch)
-        source_ids, source_mask, position_idx, attn_mask, rel_pos, target_ids, target_mask, _ = batch
+        source_ids, source_mask, position_idx, attn_mask, rel_pos, target_ids, target_mask = batch
         with torch.no_grad():
             loss, _, _ = model(source_ids=source_ids, source_mask=source_mask,
                                position_idx=position_idx, attn_mask=attn_mask,
@@ -62,7 +62,7 @@ def eval_acc_epoch(args, eval_dataloader, model, split_tag):
 
     for batch in tqdm(eval_dataloader, total=len(eval_dataloader), desc="Eval acc for {} set".format(split_tag)):
         batch = tuple(t.to(args.device) for t in batch)
-        source_ids, source_mask, position_idx, attn_mask, rel_pos, target_ids, target_mask, gold_ids = batch
+        source_ids, source_mask, position_idx, attn_mask, rel_pos, target_ids, target_mask = batch
 
         with torch.no_grad():
             preds = model(source_ids=source_ids, source_mask=source_mask,
@@ -74,7 +74,7 @@ def eval_acc_epoch(args, eval_dataloader, model, split_tag):
             top_preds = top_preds * target_mask  # 对应位置进行mask
             total_num += torch.sum(target_mask[:, 1:]).cpu().numpy()
             pad_num = torch.sum(target_mask[:, 1:] == 0).cpu().numpy()
-            acc = torch.sum(top_preds[:, 1:] == gold_ids[:, 1:]).cpu().numpy()
+            acc = torch.sum(top_preds[:, 1:] == target_ids[:, 1:]).cpu().numpy()
             total_acc_num += acc - pad_num
 
     print('total acc num', total_acc_num)
@@ -147,7 +147,7 @@ def main():
             for step, batch in enumerate(bar):
                 batch = tuple(t.to(args.device) for t in batch)
 
-                source_ids, source_mask, position_idx, attn_mask, rel_pos, target_ids, target_mask, _ = batch
+                source_ids, source_mask, position_idx, attn_mask, rel_pos, target_ids, target_mask = batch
 
                 loss, _, _ = model(source_ids=source_ids, source_mask=source_mask,
                                    position_idx=position_idx, attn_mask=attn_mask,

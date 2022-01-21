@@ -58,8 +58,7 @@ class FuncNamingDataset(Dataset):
                 torch.tensor(attn_mask),
                 torch.tensor(example.rel_pos),
                 torch.tensor(example.target_ids),
-                torch.tensor(example.target_mask),
-                torch.tensor(example.gold_ids))
+                torch.tensor(example.target_mask))
 
 
 class FuncNamingFeature(object):
