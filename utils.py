@@ -190,6 +190,7 @@ def get_func_naming_feature(item, tokenizer, args):
 
     position_idx += [tokenizer.pad_token_id] * (max_source_len - len(position_idx))
     source_ids += [tokenizer.pad_token_id] * padding_length
+
     source_mask = [1] * (len(source_tokens))
     source_mask += [0] * padding_length
 
@@ -201,6 +202,10 @@ def get_func_naming_feature(item, tokenizer, args):
     padding_length = 7 - len(target_ids)
     target_ids += [tokenizer.pad_token_id] * padding_length
     target_mask += [0] * padding_length
+
+    assert (len(source_ids) == 512+64)
+    assert (len(position_idx) == 512 + 64)
+    assert (len(source_mask) == 512 + 64)
 
     feature = FuncNamingFeature(example_id,
                                 source_ids,
