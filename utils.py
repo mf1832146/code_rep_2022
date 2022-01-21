@@ -17,11 +17,12 @@ seq_rel_pos = build_relative_position()[0]
 
 def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
     data_tag = '_all' if args.data_num == -1 else '_%d' % args.data_num
-    cache_fn = '{}/{}.pt'.format(args.cache_path, split_tag + data_tag)
+    cache_fn = '{}/{}.pkl'.format(args.cache_path, split_tag + data_tag)
 
     if os.path.exists(cache_fn):
         logger.info("Load cache data from %s", cache_fn)
-        data = torch.load(cache_fn)
+        examples = pickle.load(open(cache_fn, 'rb'))
+        data = FuncNamingDataset(examples)
     else:
         logger.info("Create cache data into %s", cache_fn)
 
@@ -35,7 +36,7 @@ def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
                             tqdm(list(results), total=results.count()))
         data = FuncNamingDataset(examples)
         if args.local_rank in [-1, 0]:
-            torch.save(data, cache_fn)
+            pickle.dump(examples, open(cache_fn, 'wb'))
     return data
 
 

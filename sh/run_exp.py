@@ -17,8 +17,8 @@ def get_cmd(task, sub_task, model_tag, gpu, data_num, bs, lr, max_ast_len,
 
 def get_args_by_task_model(task):
     if task == 'method_name':
-        max_ast_len = 256
-        max_code_len = 128
+        max_ast_len = 512
+        max_code_len = 256
         max_dfg_len = 32
         max_rel_pos = 64
 
