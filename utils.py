@@ -30,11 +30,13 @@ def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
                     'split_ud_pos': 1, 'dfg_to_dfg': 1, 'dfg_to_code': 1,
                     'func_name': 1}
     conditions = {'partition': split_tag, 'lang': args.sub_task, 'is_ok': 1}
-
+    logger.info("从数据库读取...")
     results = connect_db().codes.find(conditions, return_items)
+    logger.info("从数据库读取完成.")
     examples = pool.map(partial(get_func_naming_feature, tokenizer=tokenizer, args=args),
-                        tqdm(list(results), total=results.count()))
+                        tqdm(list(results), total=results.count(), desc='convert to features.'))
     data = FuncNamingDataset(examples)
+    logger.info("加载数据完成.")
         # if args.local_rank in [-1, 0]:
         #     pickle.dump(examples, open(cache_fn, 'wb'))
     return data
