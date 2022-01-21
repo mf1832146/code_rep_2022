@@ -189,10 +189,10 @@ def get_func_naming_feature(item, tokenizer, args):
         position_idx += [-1] * len(dfg_to_dfg)
 
     position_idx += [tokenizer.pad_token_id] * (max_source_len - len(position_idx))
-    source_ids += [tokenizer.pad_token_id] * padding_length
 
-    source_mask = [1] * (len(source_tokens))
+    source_mask = [1] * (len(source_ids))
     source_mask += [0] * padding_length
+    source_ids += [tokenizer.pad_token_id] * padding_length
 
     target_tokens = tokenizer.tokenize(func_name)[:args.max_target_length - 2]
     target_tokens = [tokenizer.cls_token] + target_tokens + [tokenizer.sep_token]
