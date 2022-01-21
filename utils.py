@@ -17,26 +17,26 @@ seq_rel_pos = build_relative_position()[0]
 
 def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
     data_tag = '_all' if args.data_num == -1 else '_%d' % args.data_num
-    cache_fn = '{}/{}.pkl'.format(args.cache_path, split_tag + data_tag)
+    # cache_fn = '{}/{}.pkl'.format(args.cache_path, split_tag + data_tag)
 
-    if os.path.exists(cache_fn):
-        logger.info("Load cache data from %s", cache_fn)
-        examples = pickle.load(open(cache_fn, 'rb'))
-        data = FuncNamingDataset(examples)
-    else:
-        logger.info("Create cache data into %s", cache_fn)
+    # if os.path.exists(cache_fn):
+    #     logger.info("Load cache data from %s", cache_fn)
+    #     examples = pickle.load(open(cache_fn, 'rb'))
+    #     data = FuncNamingDataset(examples)
+    # else:
+    # logger.info("Create cache data into %s", cache_fn)
 
-        return_items = {'code_index': 1, 'non_leaf_tokens': 1, 'masked_leaf_tokens': 1,
-                        'split_ud_pos': 1, 'dfg_to_dfg': 1, 'dfg_to_code': 1,
-                        'func_name': 1}
-        conditions = {'partition': split_tag, 'lang': args.sub_task, 'is_ok': 1}
+    return_items = {'code_index': 1, 'non_leaf_tokens': 1, 'masked_leaf_tokens': 1,
+                    'split_ud_pos': 1, 'dfg_to_dfg': 1, 'dfg_to_code': 1,
+                    'func_name': 1}
+    conditions = {'partition': split_tag, 'lang': args.sub_task, 'is_ok': 1}
 
-        results = connect_db().codes.find(conditions, return_items)
-        examples = pool.map(partial(get_func_naming_feature, tokenizer=tokenizer, args=args),
-                            tqdm(list(results), total=results.count()))
-        data = FuncNamingDataset(examples)
-        if args.local_rank in [-1, 0]:
-            pickle.dump(examples, open(cache_fn, 'wb'))
+    results = connect_db().codes.find(conditions, return_items)
+    examples = pool.map(partial(get_func_naming_feature, tokenizer=tokenizer, args=args),
+                        tqdm(list(results), total=results.count()))
+    data = FuncNamingDataset(examples)
+        # if args.local_rank in [-1, 0]:
+        #     pickle.dump(examples, open(cache_fn, 'wb'))
     return data
 
 
