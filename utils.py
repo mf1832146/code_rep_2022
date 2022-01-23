@@ -37,6 +37,14 @@ def load_and_cache_gen_data_from_db(args, pool, tokenizer, split_tag):
                         tqdm(list(results), total=results.count(), desc='convert to features.'))
     data = FuncNamingDataset(examples)
     logger.info("加载数据完成.")
+
+    for example in examples[:1]:
+        logger.info("source id shape :" + str(len(example.source_ids)))
+        logger.info("position id shape : " + str(len(example.position_idx)))
+        logger.info("source mask shape : " + str(len(example.source_mask)))
+        logger.info("rel_pos shape : " + str(example.rel_pos.shape))
+        logger.info("target id shape :" + str(len(example.target_ids)))
+        logger.info("target mask shape :" + str(len(example.target_mask)))
         # if args.local_rank in [-1, 0]:
         #     pickle.dump(examples, open(cache_fn, 'wb'))
     return data
@@ -202,10 +210,10 @@ def get_func_naming_feature(item, tokenizer, args):
     padding_length = 7 - len(target_ids)
     target_ids += [tokenizer.pad_token_id] * padding_length
     target_mask += [0] * padding_length
-    if len(source_ids) != (512+64):
-        logger.info('ast len ' + str(len(source_tokens)))
-        logger.info('dfg len ' + str(len(dfg_to_dfg)))
-        logger.info('fina source id ' + str(len(source_ids)))
+    # if len(source_ids) != (512+64):
+    #     logger.info('ast len ' + str(len(source_tokens)))
+    #     logger.info('dfg len ' + str(len(dfg_to_dfg)))
+    #     logger.info('fina source id ' + str(len(source_ids)))
 
     feature = FuncNamingFeature(example_id,
                                 source_ids,
