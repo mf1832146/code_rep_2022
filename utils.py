@@ -196,7 +196,7 @@ def get_func_naming_feature(item, tokenizer, args):
     if args.use_dfg:
         position_idx += [-1] * len(dfg_to_dfg)
 
-    position_idx += [tokenizer.pad_token_id] * (max_source_len - len(position_idx))
+    position_idx += [tokenizer.pad_token_id] * (max_src_len - len(position_idx))
 
     source_mask = [1] * (len(source_ids))
     source_mask += [0] * padding_length
