@@ -18,6 +18,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 from utils import get_elapse_time, load_and_cache_gen_data_from_db
 from collections import OrderedDict
 import numpy as np
+from clearml import Task
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -87,6 +88,9 @@ def eval_acc_epoch(args, eval_dataloader, model, split_tag):
 def main():
     parser = argparse.ArgumentParser()
     args = add_args(parser)
+
+    task = Task.init(project_name=args.task, task_name=args.sub_task)
+
     logger.info(args)
     t0 = time.time()
 
@@ -98,6 +102,7 @@ def main():
         # for DataParallel
         model = torch.nn.DataParallel(model)
     pool = multiprocessing.Pool(args.cpu_cont)
+
     fa = open(os.path.join(args.output_dir, 'summary.log'), 'a+')
     if args.do_train:
         if args.local_rank in [-1, 0] and args.data_num == -1:

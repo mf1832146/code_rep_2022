@@ -165,18 +165,18 @@ def get_func_naming_feature(item, tokenizer, args):
     rel_pos[0, :len(source_ids)] = 1
     rel_pos[end_s_pos, :len(source_ids)] = 1
 
-    max_source_len = 0
+    max_src_len = 0
 
     position_idx = [-3]  # start pos
 
     if args.use_ast:
-        max_source_len += args.max_ast_len
+        max_src_len += args.max_ast_len
     else:
-        max_source_len += args.max_code_len
+        max_src_len += args.max_code_len
     if args.use_dfg:
-        max_source_len += args.max_dfg_len
+        max_src_len += args.max_dfg_len
 
-    padding_length = max_source_len - len(source_ids)
+    padding_length = max_src_len - len(source_ids)
 
     if args.use_ast:
         position_idx += [-3] * len(non_leaf_tokens)

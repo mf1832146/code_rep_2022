@@ -5,3 +5,4 @@ torch~=1.8.0
 numpy~=1.21.2
 tqdm~=4.62.3
 tensorboard~=2.7.0
+clearml~=1.1.6

@@ -29,7 +29,7 @@ def build_config(args, tokenizer):
         max_rel_pos = int(args.max_rel_pos / 2) + 1
     deberta_config = DebertaConfig(vocab_size=tokenizer.vocab_size,
                                    hidden_size=512,
-                                   num_hidden_layers=6,
+                                   num_hidden_layers=2,
                                    num_attention_heads=8,
                                    intermediate_size=2048,
                                    relative_attention=True,
@@ -58,7 +58,7 @@ def build_or_load_gen_model(args):
 
     encoder = MyDebertaModel(config)
     decoder_layer = nn.TransformerDecoderLayer(d_model=config.hidden_size, nhead=config.num_attention_heads)
-    decoder = nn.TransformerDecoder(decoder_layer, num_layers=6)
+    decoder = nn.TransformerDecoder(decoder_layer, num_layers=2)
     model = Seq2Seq(encoder=encoder, decoder=decoder, config=config,
                     beam_size=args.beam_size, max_length=args.max_target_length,
                     sos_id=tokenizer.cls_token_id, eos_id=tokenizer.sep_token_id)
