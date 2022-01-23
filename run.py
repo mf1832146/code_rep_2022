@@ -89,7 +89,15 @@ def main():
     parser = argparse.ArgumentParser()
     args = add_args(parser)
 
-    task = Task.init(project_name=args.task, task_name=args.sub_task)
+    task_name = args.sub_task
+    if args.use_code:
+        task_name += '_code'
+    if args.use_dfg:
+        task_name += '_dfg'
+    if args.use_ast:
+        task_name += '_ast'
+
+    task = Task.init(project_name=args.task, task_name=task_name)
 
     logger.info(args)
     t0 = time.time()
