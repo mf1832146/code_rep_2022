@@ -139,7 +139,9 @@ def get_func_naming_feature(item, tokenizer, args):
         rel_leaf_pos = seq_rel_pos[:leaf_token_len, :leaf_token_len]
         if args.use_ast:
             rel_leaf_pos += args.max_rel_pos  # 偏移
-        length = len([tokenizer.cls_token]) + len(non_leaf_tokens)
+        length = len([tokenizer.cls_token])
+        if args.use_ast:
+            length + len(non_leaf_tokens)
         rel_pos[length:length+leaf_token_len, length:length+leaf_token_len] = rel_leaf_pos
 
     if args.use_dfg:
