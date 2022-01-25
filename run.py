@@ -153,6 +153,8 @@ def main():
         # global_step, best_bleu_em, best_ppl = 0, -1, 1e6
         # not_loss_dec_cnt, not_bleu_em_inc_cnt = 0, 0 if args.do_eval_bleu else 1e6
 
+        train_step = 0
+
         for cur_epoch in range(args.start_epoch, args.num_train_epochs):
             bar = tqdm(train_dataloader, total=len(train_dataloader), desc='Training')
             nb_tr_examples, nb_tr_steps, tr_loss = 0, 0, 0
@@ -172,6 +174,10 @@ def main():
                 if args.gradient_accumulation_steps > 1:
                     loss = loss / args.gradient_accumulation_steps
                 tr_loss += loss.item()
+
+                if args.data_num == -1:
+                    tb_writer.add_scalar('train_loss', tr_loss, train_step)
+                    train_step += 1
 
                 nb_tr_examples += source_ids.size(0)
                 nb_tr_steps += 1
