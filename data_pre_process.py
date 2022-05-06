@@ -161,42 +161,35 @@ if __name__ == '__main__':
         results = connect_db().codes.find(conditions, return_items)
 
         start_time = time.time()
-        processed_results = []
-
-        for result in tqdm(results, total=results.count(), desc='generate rel pos'):
-            processed_result = deal_with_ast(result)
-            if processed_result is not None:
-                processed_results.append(processed_result)
-
-        ud_pos_gen_time = time.time()
-
+        times = 0
         examples = []
         rel_pos_list = []
 
         cache_fn = './cache_file/{}_examples.pkl'.format(split_tag)
         cache_rel_pos = './cache_file/{}_rel_pos.h5'.format(split_tag)
 
-        times = 0
+        for result in tqdm(results, total=results.count(), desc='generate rel pos'):
+            processed_result = deal_with_ast(result)
+            if processed_result is not None:
+                example = get_func_naming_feature(processed_result, tokenizer, args)
+                rel_pos = example.rel_pos
+                example.rel_pos = None  # 减少存储
+                examples.append(example)
 
-        for j, result in tqdm(enumerate(processed_results), total=len(processed_results),
-                              desc='convert to features.'):
-            example = get_func_naming_feature(result, tokenizer, args)
-            rel_pos = example.rel_pos
-            example.rel_pos = None  # 减少存储
-            examples.append(example)
+                rel_pos_list.append(rel_pos)
+                if len(rel_pos_list) == 1000:
+                    save_h5(cache_rel_pos, np.array(rel_pos_list, dtype=float), times=times)
+                    print('update h5 ', times, ' times')
+                    times += 1
+                    rel_pos_list = []
 
-            rel_pos_list.append(rel_pos)
-            if len(rel_pos_list) == 1000 or j == len(processed_results) - 1:
-                save_h5(cache_rel_pos, np.array(rel_pos_list, dtype=float), times=times)
-                times += 1
-                rel_pos_list = []
+        if len(rel_pos_list) != 0:
+            save_h5(cache_rel_pos, np.array(rel_pos_list, dtype=float), times=times)
 
         pickle.dump(examples, open(cache_fn, 'wb'))
 
         end_time = time.time()
 
-        time_costs[i].append(ud_pos_gen_time - start_time)
-        time_costs[i].append(end_time - ud_pos_gen_time)
         time_costs[i].append(end_time - start_time)
 
     print(time_costs)
