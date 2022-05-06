@@ -57,8 +57,8 @@ def add_args(parser):
     #                    help="Pretrained tokenizer name or path if not the same as model_name")
 
     parser.add_argument("--max_dfg_len", default=64, type=int)
-    parser.add_argument("--max_code_len", default=256, type=int)
-    parser.add_argument("--max_ast_len", default=512, type=int)
+    parser.add_argument("--max_code_len", default=128, type=int)
+    parser.add_argument("--max_ast_len", default=256, type=int)
     parser.add_argument("--use_ast", action='store_true')
     parser.add_argument("--use_code", action='store_true')
     parser.add_argument("--use_dfg", action='store_true')

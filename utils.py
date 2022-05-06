@@ -84,7 +84,7 @@ def get_func_naming_feature(item, tokenizer, args):
     example_id = item['code_index']
     non_leaf_tokens = item['non_leaf_tokens']
     leaf_tokens = item['masked_leaf_tokens']
-    ud_pos = pickle.loads(item['split_ud_pos'])
+    ud_pos = item['split_ud_pos']
     dfg_to_dfg = item['dfg_to_dfg']
     dfg_to_code = item['dfg_to_code']
     func_name = item['func_name']

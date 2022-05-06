@@ -3,15 +3,18 @@
 # 生成关系矩阵
 import argparse
 import multiprocessing
-
+from functools import partial
+import time
 import numpy as np
 import pickle
+import h5py
 
 from tokenizers import Tokenizer
 from tqdm import tqdm
 from transformers import PreTrainedTokenizerFast
-from _utils import ast2seq, connect_db, get_ud2pos
-
+from _utils import ast2seq, connect_db, get_ud2pos, clean_ast, remove_node, sub_tree
+from config import add_args
+from utils import get_func_naming_feature, FuncNamingDataset
 
 ud2pos = get_ud2pos(64)
 
@@ -32,9 +35,14 @@ def deal_with_ast(item):
     ast = pickle.loads(item['ast'])
     dfg = pickle.loads(item['dfg'])
     index2code = pickle.loads(item['index_to_code'])
+
+    clean_ast(ast)
+    sub_tree(ast, 256)  # args.max_ast_len
+    remove_node(ast, index2code)
+
     func_name = item['func_name']
     if func_name == '':
-        return
+        return None
 
     if '.' in func_name:
         func_name = func_name.split('.')[-1]
@@ -102,35 +110,100 @@ def deal_with_ast(item):
     dfg_to_code = [ori2cur_pos[x[1]] for x in dfg]
 
     # 写入数据库
-    add_values = {
+    r = {
+        'code_index': item['code_index'],
+        'func_name': item['func_name'],
         'non_leaf_tokens': non_leaf_tokens,
         'leaf_tokens': split_leaf_tokens,
         'masked_leaf_tokens': masked_leaf_tokens,
-        'split_ud_pos': pickle.dumps(split_ud_pos),
+        'split_ud_pos': split_ud_pos,
         'dfg_to_dfg': dfg_to_dfg,
         'dfg_to_code': dfg_to_code,
-        'is_ok': 1
     }
-    try:
-        db.update_one({'_id': _id}, {'$set': add_values})
-    except:
-        db.update_one({'_id': _id}, {'$set': {'is_ok': 0}})
+    return r
+
+
+def save_h5(file_name, data, times=0):
+    chunk_size = 1000
+    if times == 0:
+        h5f = h5py.File(file_name, 'w')
+        dataset = h5f.create_dataset("up_pos", (chunk_size, 320, 320),
+                                     maxshape=(None, 320, 320),
+                                     dtype='float32')
+    else:
+        h5f = h5py.File(file_name, 'a')
+        dataset = h5f['up_pos']
+
+    dataset.resize([(times + 1) * chunk_size, 320, 320])
+
+    dataset[times * chunk_size: times * chunk_size + data.shape[0]] = data
+    h5f.close()
+
+
+def load_h5(file_name):
+    h5f = h5py.File(file_name, 'r')
+    data = h5f['up_pos']
+    return data
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--lang', type=str)
+    add_args(parser)
     args = parser.parse_args()
     print('generate rel pos for lang : ', args.lang)
-    pool = multiprocessing.Pool(5)
-    conditions = {'lang': args.lang, 'build_ast': 1}
-    return_items = {'code_index': 1, 'ast': 1, 'func_name': 1, 'dfg': 1, 'index_to_code': 1}
-    results = connect_db().codes.find(conditions, return_items)
 
-    for result in tqdm(results, total=results.count(), desc= 'generate rel pos'):
-        deal_with_ast(result)
+    split_tags = ['train', 'test', 'valid']
 
-    pool.map(deal_with_ast, tqdm(list(results), 'generate rel pos'))
+    time_costs = [[], [], []]
+    for i, split_tag in enumerate(split_tags):
+        conditions = {'partition': split_tag, 'lang': args.lang, 'build_ast': 1}
+        return_items = {'code_index': 1, 'ast': 1, 'func_name': 1, 'dfg': 1, 'index_to_code': 1}
+        results = connect_db().codes.find(conditions, return_items)
+
+        start_time = time.time()
+        processed_results = []
+
+        for result in tqdm(results, total=results.count(), desc='generate rel pos'):
+            processed_result = deal_with_ast(result)
+            if processed_result is not None:
+                processed_results.append(processed_result)
+
+        ud_pos_gen_time = time.time()
+
+        examples = []
+        rel_pos_list = []
+
+        cache_fn = './cache_file/{}_examples.pkl'.format(split_tag)
+        cache_rel_pos = './cache_file/{}_rel_pos.h5'.format(split_tag)
+
+        times = 0
+
+        for j, result in tqdm(enumerate(processed_results), total=len(processed_results),
+                              desc='convert to features.'):
+            example = get_func_naming_feature(result, tokenizer, args)
+            rel_pos = example.rel_pos
+            example.rel_pos = None  # 减少存储
+            examples.append(example)
+
+            rel_pos_list.append(rel_pos)
+            if len(rel_pos_list) == 1000 or j == len(processed_results) - 1:
+                save_h5(cache_rel_pos, np.array(rel_pos_list, dtype=float), times=times)
+                times += 1
+                rel_pos_list = []
+
+        pickle.dump(examples, open(cache_fn, 'wb'))
+
+        end_time = time.time()
+
+        time_costs[i].append(ud_pos_gen_time - start_time)
+        time_costs[i].append(end_time - ud_pos_gen_time)
+        time_costs[i].append(end_time - start_time)
+
+    print(time_costs)
+
+
+
+
 
 
 

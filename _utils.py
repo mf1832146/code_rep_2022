@@ -155,5 +155,5 @@ def get_ud_masks(dp, id2pos, max_len):
 
 def connect_db():
     # 172.29.7.221  127.0.0.1
-    client = MongoClient('127.0.0.1', 27017, username='admin', password='123456')
+    client = MongoClient('172.29.7.221', 27017, username='admin', password='123456')
     return client.code_search_net
